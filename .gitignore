@@ -1,0 +1,5 @@
+*.csv
+.vscode
+.git
+.ipynb_checkpoints
+venv/

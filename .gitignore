@@ -1,5 +1,8 @@
 .vscode
 .git
 .ipynb_checkpoints
+cheater_data.parquet/
+spark-warehouse/
 venv/
+__pycache__/
 pubg_banned_users_202002.txt

@@ -1,7 +1,7 @@
 # The purpose of this script is to sort and convert the banned user data into a csv file
 # Banned user data was collected from https://pubg.game.daum.net
 
-with open('./pubg_banned_users_202002.txt') as banned_user_file:
+with open('./kakao_pubg_banned_users_202002.txt') as banned_user_file:
     lines = banned_user_file.read()
 
 #strip and delete empty str and user names that contains "*"

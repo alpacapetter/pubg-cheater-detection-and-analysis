@@ -1,4 +1,4 @@
-# from banned_user_list_data_cleaning import banned_user_list
+from banned_user_list_data_cleaning import banned_user_list
 from datetime import datetime
 import json
 import time
@@ -8,10 +8,19 @@ import pandas as pd
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql import SQLContext
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 
 
 def extractData(soup_json):
     '''Returns multiple rows of data from given json soup'''
+
+    def checkKey(soup_json_nest, key):
+        '''Returns None if key doesn't exist in json soup'''
+        if key in soup_json_nest:
+            return soup_json_nest[key]
+        else:
+            return None
+
     game_num = 0
     vals = []
     rows = []
@@ -23,8 +32,8 @@ def extractData(soup_json):
             vals.append(datetime.strptime(soup_json['matches']['items'][game_num]['started_at'], '%Y-%m-%dT%H:%M:%S+0000'))
             vals.append(soup_json['matches']['items'][game_num]['total_rank'])
             vals.append(soup_json['matches']['items'][game_num]['queue_size'])
-            vals.append(soup_json['matches']['items'][game_num]['map_name'])
-            vals.append(soup_json['matches']['items'][game_num]['match_type'])
+            vals.append(checkKey(soup_json['matches']['items'][game_num], 'map_name'))
+            vals.append(checkKey(soup_json['matches']['items'][game_num], 'match_type'))
             vals.append(soup_json['matches']['items'][game_num]['participant']['user']['nickname'])
             vals.append(soup_json['matches']['items'][game_num]['participant']['stats']['rank'])
             vals.append(soup_json['matches']['items'][game_num]['participant']['stats']['combat']['heals'])
@@ -54,7 +63,7 @@ def extractMoreData(df, soup_json):
             if counter == 11:
                 break
             print(f'ID:{user} current page:{counter}')
-            time.sleep(1)
+            # time.sleep(.1)
             
             # Find new url with more data using "offset" key
             offset = soup_json['matches']['items'][19]['offset']
@@ -65,7 +74,7 @@ def extractMoreData(df, soup_json):
 
             # Append the new row (new df) into the original df
             rows = extractData(soup_json)
-            new_row = spark.createDataFrame(rows, columns)
+            new_row = spark.createDataFrame(rows, schema=schema)
             df = df.union(new_row)
         except IndexError:
             break
@@ -86,12 +95,14 @@ sc = SparkContext.getOrCreate()
 sqlContext = SQLContext(sc)
 
 df = None
-banned_user_list = ["txQQ-2158195697", "watermeloong"]
 progress_counter = 0
 
 for user in banned_user_list:
     # Find user data id
-    data_user_id = dataUserIdFinder(user)
+    try:
+        data_user_id = dataUserIdFinder(user)
+    except:
+        continue
 
     # Navigate to initial json data page
     url = f'https://pubg.op.gg/api/users/{data_user_id}/matches/recent'
@@ -102,18 +113,36 @@ for user in banned_user_list:
     # Create df and insert initial data
     if df == None:
         rows = extractData(soup_json)
-        columns = ['type','mode','started_at',
-                'total_rank','queue_size','map_name',
-                'match_type','nickname','rank',
-                'heals','boosts','death_type',
-                'time_survived','kills','assists',
-                'kill_steaks','headshot_kills','longest_kill',
-                'damage_dealt','knock_downs','revives']
-        df = spark.createDataFrame(rows, columns)
+
+        schema = StructType(
+            [
+                StructField("type", StringType(), True), 
+                StructField("mode", StringType(), True), 
+                StructField("started_at", TimestampType(), True), 
+                StructField("total_rank", IntegerType(), True), 
+                StructField("queue_size", IntegerType(), True), 
+                StructField("map_name", StringType(), True), 
+                StructField("match_type", StringType(), True), 
+                StructField("nickname", StringType(), True), 
+                StructField("rank", IntegerType(), True), 
+                StructField("heals", IntegerType(), True), 
+                StructField("boosts", IntegerType(), True), 
+                StructField("death_type", StringType(), True), 
+                StructField("time_survived", IntegerType(), True), 
+                StructField("kills", IntegerType(), True), 
+                StructField("assists", IntegerType(), True), 
+                StructField("kill_steaks", IntegerType(), True), 
+                StructField("headshot_kills", IntegerType(), True), 
+                StructField("longest_kill", IntegerType(), True), 
+                StructField("damage_dealt", IntegerType(), True), 
+                StructField("knock_downs", IntegerType(), True), 
+                StructField("revives", IntegerType(), True)
+                ])
+        df = spark.createDataFrame(rows, schema=schema)
     else:
         # Append the new row (new df) into the original df
         rows = extractData(soup_json)
-        new_row = spark.createDataFrame(rows, columns)
+        new_row = spark.createDataFrame(rows, schema=schema)
         df = df.union(new_row)
 
     # Continue to get more data

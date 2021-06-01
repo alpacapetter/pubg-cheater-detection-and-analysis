@@ -4,7 +4,7 @@
 with open('./kakao_pubg_banned_users_202002.txt') as banned_user_file:
     lines = banned_user_file.read()
 
-#strip and delete empty str and user names that contains "*"
+# Strip and delete empty str and user names that contains "*"
 banned_user_list = ""
 
 for line in lines:

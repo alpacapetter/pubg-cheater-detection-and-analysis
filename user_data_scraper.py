@@ -90,14 +90,18 @@ def dataUserIdFinder(user):
     return data_user_id
 
 
+# Start Spark Session and df
 spark = SparkSession.builder.appName('pubg_data').getOrCreate()
 sc = SparkContext.getOrCreate()
 sqlContext = SQLContext(sc)
 
 df = None
 progress_counter = 0
+counter = 1
 
-for user in banned_user_list:
+while len(banned_user_list) != 0:
+    user = banned_user_list.pop()
+
     # Find user data id
     try:
         data_user_id = dataUserIdFinder(user)
@@ -137,7 +141,7 @@ for user in banned_user_list:
                 StructField("damage_dealt", IntegerType(), True), 
                 StructField("knock_downs", IntegerType(), True), 
                 StructField("revives", IntegerType(), True)
-                ])
+            ])
         df = spark.createDataFrame(rows, schema=schema)
     else:
         # Append the new row (new df) into the original df
@@ -148,7 +152,13 @@ for user in banned_user_list:
     # Continue to get more data
     df = extractMoreData(df, soup_json)
     progress_counter += 1
-    print(progress_counter / len(banned_user_list) * 100, " percent done")
 
-# Save data
-df.write.parquet("./cheater_data.parquet", mode='overwrite')
+    # Progress checker
+    print(progress_counter / len(banned_user_list) * 100, "percent done")
+
+    # Save data (ever 50 player)
+    if counter == 50:
+        df.write.parquet(f"./cheater_data/cheater_data_{str(progress_counter)}.parquet", mode='overwrite')
+        counter = 0
+
+    counter += 1

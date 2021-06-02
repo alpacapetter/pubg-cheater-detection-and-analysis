@@ -60,7 +60,7 @@ def extractMoreData(df, soup_json):
     while True:
         try:
             counter += 1
-            if counter == 11:
+            if counter == 5:
                 break
             print(f'ID:{user} current page:{counter}')
             # time.sleep(.1)
@@ -91,13 +91,30 @@ def dataUserIdFinder(user):
 
 
 # Start Spark Session and df
-spark = SparkSession.builder.appName('pubg_data').getOrCreate()
+# spark = SparkSession.builder.appName('pubg_data').getOrCreate()
+spark = SparkSession.builder \
+    .master('local[4]') \
+    .config("spark.driver.memory", "2g") \
+    .config("spark.executor.memory", "2g") \
+    .config("spark.executor.cores", "4") \
+    .config("spark.cores.max", "4") \
+    .appName('pubg_data') \
+    .getOrCreate()
+
+# spark.sparkContext._conf.getAll()
+# conf = spark.sparkContext._conf.setAll([('spark.executor.memory', '2g'), ('spark.app.name', 'pubg_data'), ('spark.executor.cores', '2'), ('spark.cores.max', '2'), ('spark.driver.memory','2g')])
+# spark.sparkContext.stop()
+# spark = SparkSession.builder.config(conf=conf).getOrCreate()
+
 sc = SparkContext.getOrCreate()
 sqlContext = SQLContext(sc)
+
 
 df = None
 progress_counter = 0
 counter = 1
+banned_user_list = banned_user_list[400:]
+userlen = len(banned_user_list)
 
 while len(banned_user_list) != 0:
     user = banned_user_list.pop()
@@ -106,6 +123,8 @@ while len(banned_user_list) != 0:
     try:
         data_user_id = dataUserIdFinder(user)
     except:
+        counter += 1
+        progress_counter += 1
         continue
 
     # Navigate to initial json data page
@@ -154,11 +173,15 @@ while len(banned_user_list) != 0:
     progress_counter += 1
 
     # Progress checker
-    print(progress_counter / len(banned_user_list) * 100, "percent done")
+    print(progress_counter / userlen * 100, "percent done")
+    # Save data (ever ## player)
+    if counter == 100 or len(banned_user_list) == 0:
 
-    # Save data (ever 50 player)
-    if counter == 50:
-        df.write.parquet(f"./cheater_data/cheater_data_{str(progress_counter)}.parquet", mode='overwrite')
+        df.repartition("nickname")\
+            .write.partitionBy("nickname")\
+            .parquet(f"./cheater_data/cheater_data_{str(progress_counter//counter)}.parquet", mode='overwrite')
+        # df.write.parquet(f"./cheater_data/cheater_data_{str(progress_counter//counter)}.parquet", mode='overwrite')
+        df = None
         counter = 0
 
     counter += 1

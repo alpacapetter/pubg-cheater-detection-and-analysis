@@ -1,7 +1,7 @@
 from banned_user_list_data_cleaning import banned_user_list
 from datetime import datetime
+import glob
 import json
-import time
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -63,7 +63,6 @@ def extractMoreData(df, soup_json):
             if counter == 5:
                 break
             print(f'ID:{user} current page:{counter}')
-            # time.sleep(.1)
             
             # Find new url with more data using "offset" key
             offset = soup_json['matches']['items'][19]['offset']
@@ -91,7 +90,6 @@ def dataUserIdFinder(user):
 
 
 # Start Spark Session and df
-# spark = SparkSession.builder.appName('pubg_data').getOrCreate()
 spark = SparkSession.builder \
     .master('local[4]') \
     .config("spark.driver.memory", "2g") \
@@ -101,19 +99,12 @@ spark = SparkSession.builder \
     .appName('pubg_data') \
     .getOrCreate()
 
-# spark.sparkContext._conf.getAll()
-# conf = spark.sparkContext._conf.setAll([('spark.executor.memory', '2g'), ('spark.app.name', 'pubg_data'), ('spark.executor.cores', '2'), ('spark.cores.max', '2'), ('spark.driver.memory','2g')])
-# spark.sparkContext.stop()
-# spark = SparkSession.builder.config(conf=conf).getOrCreate()
-
 sc = SparkContext.getOrCreate()
 sqlContext = SQLContext(sc)
-
 
 df = None
 progress_counter = 0
 counter = 1
-banned_user_list = banned_user_list[400:]
 userlen = len(banned_user_list)
 
 while len(banned_user_list) != 0:
@@ -174,14 +165,24 @@ while len(banned_user_list) != 0:
 
     # Progress checker
     print(progress_counter / userlen * 100, "percent done")
-    # Save data (ever ## player)
-    if counter == 100 or len(banned_user_list) == 0:
 
+    # Save data every 100 player in case of interruption during scraping
+    if counter == 100 or len(banned_user_list) == 0:
         df.repartition("nickname")\
             .write.partitionBy("nickname")\
             .parquet(f"./cheater_data/cheater_data_{str(progress_counter//counter)}.parquet", mode='overwrite')
-        # df.write.parquet(f"./cheater_data/cheater_data_{str(progress_counter//counter)}.parquet", mode='overwrite')
         df = None
         counter = 0
-
     counter += 1
+
+# Combine all the parquet files into a single parquet file
+paths=glob.glob('./cheater_data/cheater_data_*.parquet')
+df = None
+for path in paths:
+    if df:
+        df_add = spark.read.parquet(path)
+        df = df.union(df_add)
+    else:
+        df = spark.read.parquet(path)
+
+df.write.parquet("./cheater_data.parquet")

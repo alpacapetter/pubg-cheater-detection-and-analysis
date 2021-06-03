@@ -1,8 +1,9 @@
 .vscode
 .git
 .ipynb_checkpoints
-cheater_data.parquet/
+cheater_data.parquet
+normal_user_data.parquet
+kakao_pubg_banned_users_202002.txt
 spark-warehouse/
 venv/
 __pycache__/
-pubg_banned_users_202002.txt

@@ -6,7 +6,6 @@
 <br>
 
 ## Table of Content
----
 1. [데이터 불러오기](#데이터-불러오기)
 1. [데이터 클리닝](#데이터-클리닝)
 1. [Feature Selection](#Feature-Selection)
@@ -17,7 +16,6 @@
 <br>
 
 ## 데이터 불러오기
----
 핵 사용 유저 아이디 3222개는 [카카오배그 홈페이지](https://pubg.game.daum.net) 에서 가져왔으며,  
 2020년 2월1일부터 29일까지 핵 사용으로 인해 정지당한 계정입니다.  
 일반 유저 아이디 3533개는 [Kaggle](https://www.kaggle.com/leonardokarl/pubg-statisctic) 에서 가져왔습니다.  
@@ -43,13 +41,11 @@ SQL 쿼리는 다음과 같은 requirement 에 의해 만들어졌습니다:
 <br>
 
 ## 데이터 클리닝
----
 데이터 클리닝 프로세스를 확인하시려면 [주피터 노트북](https://nbviewer.jupyter.org/github/alpacapetter/pubg-cheater-behavior-classification/blob/main/pubg_cheater_behavior_analysis.ipynb)을 확인하세요
 
 <br>
 
 ## Feature Selection
----
 >닉네임당 하루중 damage_dealt가 가장 높은 게임 데이터 7일치를 사용하였습니다.
 총 플레이 기간이 7일 이하인 계정은 제외하였습니다.
 
@@ -85,7 +81,6 @@ SQL 쿼리는 다음과 같은 requirement 에 의해 만들어졌습니다:
 
 
 ## Feature Mapping
----
 문자 variable을 숫자로 맵핑해줍니다
 ```
 df['mode']= df['mode'].map({'tpp':1, 'fpp':0})
@@ -99,7 +94,6 @@ df['queue_size']= df['queue_size'].map({1:0, 2:1, 4:2})
 <br>
 
 ## Feature Scaling
----
 sktime은 [Time series forest](https://www.sciencedirect.com/science/article/abs/pii/S0020025513001473) 알고리즘을 사용하기 때문에 사실 scaling에 크게 영향을 받지 않습니다. 하지만 정제된 데이터를 이후 다른 알고리즘에 대입할 수 있도록 미리 scaling 해놓았습니다.  
 
 ![before_scaling](https://i.imgur.com/y5vHkLi.png)
@@ -109,7 +103,6 @@ sktime은 [Time series forest](https://www.sciencedirect.com/science/article/abs
 <br>
 
 ## Modeling
----
 ### 모델링에 사용한 변수의 예시 그래프 입니다:
 
 그래프의 왼쪽이 가장 최근 게임이고 오른쪽이 7일 전 게임입니다.  
@@ -151,7 +144,7 @@ print(round(np.mean(score)*100, 2))
 87.8
 ```
 
-최근 7일간의 유저행동 패턴에 따라 ***87.8%*** 의 정확도로 유저의 핵 사용 여부를 확인하는 모델을 만들었습니다.  
+최근 7일간의 유저행동 패턴에 따라 ***87.8%*** 의 정확도로 유저의 핵 사용 여부를 판단합니다.  
 
 >주의사항!  
 위 모델은 핵 사용 판별이 아닌 이상징후를 파악하는 용도로 만들어졌습니다.  

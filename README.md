@@ -123,7 +123,7 @@ sktime은 [Time series forest](https://www.sciencedirect.com/science/article/abs
 scikit-learn의 classification은 각 변수를 독립된 개체로 인식합니다.  
 본 프로젝트는 각 게임이 아닌 최근 7일동안의 사용자 게임 패턴을 전체적으로 분석하여 classify을 하는것이 목적이기에 sktime의 Multivariate time series classification을 사용했습니다.  
 
-> sktime 모델의 자세한 사항은 [sktime repo](https://github.com/alan-turing-institute/sktime)를 참고하시기 바랍니다.
+> sktime의 자세한 사항은 [sktime repo](https://github.com/alan-turing-institute/sktime)를 참고하시기 바랍니다.
 
 sktime은 세가지 Time series classification 방법을 지원합니다.  
 그중 Column Ensembling은 최소 10개의 time series point가 필요하기때문에 사용하지 못했고, Bespoke classification algorithms은 아직 개발중이기에 사용하지 않았습니다.  

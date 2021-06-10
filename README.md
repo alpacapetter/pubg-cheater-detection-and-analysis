@@ -1,4 +1,7 @@
 # PUBG Cheater Detection and Analysis
+
+배틀그라운드 핵사용 유저 분석 및 Time Series Classification을 통한 핵 사용 유저 판별  
+
 ![pubg_image](https://images.logicalincrements.com/gallery/1920/822/PUBG-wallpaper-1.jpeg) 
 
  이 프로젝트의 목적은 핵 유저와 일반 유저의 게임 플레이 데이터를 수집, 비교, 분석한 후 sktime의 multivariate time series classification을 사용하여 핵 사용 유저 판별 모델을 만드는 것입니다.

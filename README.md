@@ -49,25 +49,6 @@ SQL 쿼리는 다음과 같은 requirement 에 의해 만들어졌습니다:
 <br>
 
 ## Feature Selection
->닉네임당 하루중 damage_dealt가 가장 높은 게임 데이터 7일치를 사용하였습니다.
-총 플레이 기간이 7일 이하인 계정은 제외하였습니다.
-
-다음과 같은 변수를 사용하였습니다.
-|변수|설명|
-|----|----|
-|mode|tpp, fpp|
-|queue_size|1인, 2인, 4인|
-|boosts|부스트 아이템 사용 수|
-|death_type|사망 원인|
-|kills|킬 수|
-|headshot_kills|헤드샷 킬 수|
-|assists|어시스트 수|
-|kill_steaks|킬 스트리크|
-|longest_kill|최장거리 킬 거리|
-|damage_dealt|데미지|
-|knock_downs|다운시킨 수|
-|rank_percentile|최종등수 / 총 인원|  
-<br>
 
 ![kills](https://i.imgur.com/lvq0huK.png)  
 채택한 변수중 하나인 킬 수 에 대한 그래프 입니다.  
@@ -82,6 +63,26 @@ SQL 쿼리는 다음과 같은 requirement 에 의해 만들어졌습니다:
 
 <br>
 
+다음과 같은 변수를 채택하였습니다.
+|변수|설명|
+|----|----|
+|mode|tpp, fpp|
+|queue_size|1인, 2인, 4인|
+|boosts|부스트 아이템 사용 수|
+|death_type|사망 원인|
+|kills|킬 수|
+|headshot_kills|헤드샷 킬 수|
+|assists|어시스트 수|
+|kill_steaks|킬 스트리크|
+|longest_kill|최장거리 킬 거리|
+|damage_dealt|데미지|
+|knock_downs|다운시킨 수|
+|rank_percentile|최종등수 / 총 인원|  
+
+>닉네임당 하루중 damage_dealt가 가장 높은 게임 데이터 7일치를 사용하였습니다.
+총 플레이 기간이 7일 이하인 계정은 제외하였습니다.  
+
+<br>
 
 ## Feature Mapping
 문자 variable을 숫자로 맵핑해줍니다
@@ -97,7 +98,7 @@ df['queue_size']= df['queue_size'].map({1:0, 2:1, 4:2})
 <br>
 
 ## Feature Scaling
-sktime은 [Time series forest](https://www.sciencedirect.com/science/article/abs/pii/S0020025513001473) 알고리즘을 사용하기 때문에 사실 scaling에 크게 영향을 받지 않습니다. 하지만 정제된 데이터를 이후 다른 알고리즘에 대입할 수 있도록 미리 scaling 해놓았습니다.  
+sktime은 [Time series forest](https://www.sciencedirect.com/science/article/abs/pii/S0020025513001473) 알고리즘을 사용하기 때문에 사실 scaling에 크게 영향을 받지 않습니다. 하지만 정제된 데이터를 이후 다른 학습 알고리즘에 대입할 수 있도록 미리 scaling 해놓았습니다.  
 
 ![before_scaling](https://i.imgur.com/y5vHkLi.png)
 ![after_scaling](https://i.imgur.com/NsqgCPX.png)  
@@ -122,8 +123,7 @@ sktime은 [Time series forest](https://www.sciencedirect.com/science/article/abs
 scikit-learn의 classification은 각 변수를 독립된 개체로 인식합니다.  
 본 프로젝트는 각 게임이 아닌 최근 7일동안의 사용자 게임 패턴을 전체적으로 분석하여 classify을 하는것이 목적이기에 sktime의 Multivariate time series classification을 사용했습니다.  
 
-sktime 모델의 자세한 사항은 [sktime repo](https://github.com/alan-turing-institute/sktime)를 참고하시기 바랍니다.
-
+> sktime 모델의 자세한 사항은 [sktime repo](https://github.com/alan-turing-institute/sktime)를 참고하시기 바랍니다.
 
 sktime은 세가지 Time series classification 방법을 지원합니다.  
 그중 Column Ensembling은 최소 10개의 time series point가 필요하기때문에 사용하지 못했고, Bespoke classification algorithms은 아직 개발중이기에 사용하지 않았습니다.  

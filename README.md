@@ -44,7 +44,7 @@ SQL 쿼리는 다음과 같은 requirement 에 의해 만들어졌습니다:
 <br>
 
 ## 데이터 클리닝
-데이터 클리닝 프로세스를 확인하시려면 [주피터 노트북](https://nbviewer.jupyter.org/github/alpacapetter/pubg-cheater-behavior-classification/blob/main/pubg_cheater_behavior_analysis.ipynb)을 확인하세요
+데이터 클리닝 프로세스를 확인하시려면 [주피터 노트북](https://nbviewer.jupyter.org/github/alpacapetter/pubg-cheater-behavior-classification/blob/main/pubg_cheater_behavior_analysis.ipynb)을 확인하세요.
 
 <br>
 
@@ -85,7 +85,7 @@ SQL 쿼리는 다음과 같은 requirement 에 의해 만들어졌습니다:
 <br>
 
 ## Feature Mapping
-문자 variable을 숫자로 맵핑해줍니다
+문자 variable을 숫자로 맵핑해줍니다.
 ```
 df['mode']= df['mode'].map({'tpp':1, 'fpp':0})
 df['death_type']= df['death_type'].map({'byplayer':0, 'suicide':1,'byzone':2, 'logout':3, 'alive':4})
